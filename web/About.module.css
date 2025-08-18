@@ -1,0 +1,390 @@
+.aboutContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 80vh;
+    padding: 0;
+    gap: 2rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-color) transparent;
+}
+
+.aboutContainer::-webkit-scrollbar {
+    width: 5px;
+}
+
+.aboutContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.aboutContainer::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-color);
+    border-radius: 10px;
+}
+
+.aboutContainer::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-hover-color);
+}
+
+.aboutHero {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 2rem;
+    background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+    color: white;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    margin-bottom: 0.5rem;
+}
+
+/* Dark theme specific styling for about hero */
+:root[data-theme='dark'] .aboutHero {
+    background: linear-gradient(135deg, #3d5fa9 0%, #6e4bad 100%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.aboutTitle {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.aboutImageWrapper {
+    width: 100%;
+    max-width: 800px;
+    height: 350px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    margin: 1rem auto 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.aboutImage {
+    width: 100%;
+    height: 100%;
+    background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s ease;
+}
+
+.aboutImage:hover {
+    transform: scale(1.05);
+}
+
+.aboutContent {
+    width: 100%;
+    max-width: 1000px;
+    text-align: center;
+    padding: 1rem 2rem;
+    margin-top: 0.5rem;
+}
+
+.aboutTextSection {
+    margin-bottom: 1.5rem;
+}
+
+.aboutTextSection h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    position: relative;
+    display: inline-block;
+}
+
+.aboutTextSection h2:after {
+    content: "";
+    position: absolute;
+    width: 60%;
+    height: 4px;
+    background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
+    bottom: -10px;
+    left: 20%;
+    border-radius: 2px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme specific styling for heading gradients */
+:root[data-theme='dark'] .aboutTextSection h2:after {
+    background: linear-gradient(90deg, #4b6bbd 0%, #7958c9 100%);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.aboutText {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.valuesSection {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 2rem;
+    text-align: center;
+    margin-top: -1rem;
+}
+
+.valuesSection h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+    position: relative;
+    display: inline-block;
+}
+
+.valuesSection h2:after {
+    content: "";
+    position: absolute;
+    width: 60%;
+    height: 4px;
+    background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
+    bottom: -10px;
+    left: 20%;
+    border-radius: 2px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme specific styling for heading gradients */
+:root[data-theme='dark'] .valuesSection h2:after {
+    background: linear-gradient(90deg, #4b6bbd 0%, #7958c9 100%);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.valueCards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.valueCard {
+    flex: 1;
+    min-width: 240px;
+    max-width: 280px;
+    padding: 2rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+/* Dark theme value cards with softer shadows and borders */
+:root[data-theme='dark'] .valueCard {
+    background: rgba(60, 60, 70, 0.2);
+    border: 1px solid rgba(80, 80, 95, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.valueIcon {
+    font-size: 2.5rem;
+    margin-bottom: 1.25rem;
+    color: #8E54E9;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Dark theme softened icon color */
+:root[data-theme='dark'] .valueIcon {
+    color: #9d75db;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+}
+
+.valueCard h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.valueCard p {
+    color: var(--text-color);
+    opacity: 0.8;
+    line-height: 1.6;
+}
+
+.teamSection {
+    width: 100%;
+    max-width: 1000px;
+    text-align: center;
+    padding: 0 2rem 2rem;
+    margin-top: -1rem;
+}
+
+.teamSection h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    position: relative;
+    display: inline-block;
+}
+
+.teamSection h2:after {
+    content: "";
+    position: absolute;
+    width: 60%;
+    height: 4px;
+    background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
+    bottom: -10px;
+    left: 20%;
+    border-radius: 2px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme specific styling for heading gradients */
+:root[data-theme='dark'] .teamSection h2:after {
+    background: linear-gradient(90deg, #4b6bbd 0%, #7958c9 100%);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.ctaContainer {
+    margin: 3rem 0 1rem;
+}
+
+.aboutCta {
+    display: inline-block;
+    padding: 0.9rem 2.5rem;
+    background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.aboutCta:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+/* Dark theme softer CTA button */
+:root[data-theme='dark'] .aboutCta {
+    background: linear-gradient(90deg, #4b6bbd 0%, #7958c9 100%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    color: #f0f0f0;
+}
+
+:root[data-theme='dark'] .aboutCta:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tablet Devices */
+@media (max-width: 768px) {
+    .aboutContainer {
+        gap: 1.5rem;
+    }
+    
+    .aboutHero {
+        padding: 2rem 1.5rem;
+    }
+    
+    .aboutTitle {
+        font-size: 2.5rem;
+    }
+    
+    .aboutImageWrapper {
+        height: 250px;
+    }
+    
+    .aboutContent, .valuesSection, .teamSection {
+        padding: 0 1.5rem;
+    }
+    
+    .aboutTextSection h2, .valuesSection h2, .teamSection h2 {
+        font-size: 2rem;
+    }
+    
+    .aboutText {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .valuesSection, .teamSection {
+        margin-top: -0.5rem;
+    }
+
+    .valueCards {
+        gap: 1.25rem;
+    }
+
+    .valueIcon {
+        margin-bottom: 1.25rem;
+    }
+
+    .valuesSection h2 {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Mobile Devices */
+@media (max-width: 480px) {
+    .aboutContainer {
+        gap: 1rem;
+    }
+    
+    .aboutHero {
+        padding: 1.5rem 1rem;
+    }
+    
+    .aboutTitle {
+        font-size: 2rem;
+    }
+    
+    .aboutImageWrapper {
+        height: 200px;
+    }
+    
+    .aboutContent, .valuesSection, .teamSection {
+        padding: 0 1rem;
+    }
+    
+    .aboutTextSection h2, .valuesSection h2, .teamSection h2 {
+        font-size: 1.8rem;
+    }
+    
+    .aboutText {
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+    
+    .valueCard {
+        min-width: 100%;
+    }
+
+    .valuesSection, .teamSection {
+        margin-top: -0.25rem;
+    }
+
+    .valueCards {
+        gap: 1rem;
+    }
+
+    .valueIcon {
+        margin-bottom: 1rem;
+    }
+
+    .valuesSection h2 {
+        margin-bottom: 1.25rem;
+    }
+} 

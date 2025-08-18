@@ -1,0 +1,186 @@
+.editProfileContainer {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.editProfileCard {
+  width: 100%;
+  max-width: 600px;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.editProfileCard h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--text-color);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.formSection {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.formSection h3 {
+  font-size: 1.2rem;
+  margin: 0 0 15px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--button-bg);
+  color: var(--text-color);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.formGroup:last-of-type {
+  margin-bottom: 0;
+}
+
+.formGroup label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.formGroup input,
+.formGroup textarea {
+  padding: 12px;
+  border: 1px solid var(--button-bg);
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  transition: border-color 0.3s;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--primary-link);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.formGroup small {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.passwordNote {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.disabledInput {
+  background-color: var(--input-disabled-bg) !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.formActions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  gap: 16px;
+}
+
+.cancelButton, .saveButton {
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  flex: 1;
+}
+
+.cancelButton {
+  background-color: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--button-bg);
+}
+
+.cancelButton:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.saveButton {
+  background-color: var(--primary-link);
+  color: white;
+  border: none;
+}
+
+.saveButton:hover {
+  background-color: var(--primary-link-hover);
+  transform: translateY(-1px);
+}
+
+.saveButton:disabled {
+  background-color: var(--button-disabled-bg);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error, .success {
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.error {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-size: 18px;
+  color: var(--text-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .editProfileCard {
+    padding: 20px;
+  }
+  
+  .formSection {
+    padding: 15px;
+  }
+  
+  .formActions {
+    flex-direction: column;
+  }
+  
+  .cancelButton, .saveButton {
+    width: 100%;
+  }
+} 

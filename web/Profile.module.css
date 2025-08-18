@@ -1,0 +1,135 @@
+.profileContainer {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.profileCard {
+  width: 100%;
+  max-width: 600px;
+  background-color: var(--bg-secondary, #fff);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.profileCard h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--text-primary, #333);
+}
+
+.profileInfo {
+  display: flex;
+  margin-bottom: 30px;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--primary-color, #4f46e5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+.details {
+  flex: 1;
+}
+
+.details h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: var(--text-primary, #333);
+}
+
+.details p {
+  margin: 0 0 8px 0;
+  color: var(--text-secondary, #666);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.editButton, .logoutButton {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.editButton {
+  background-color: var(--primary-color, #4f46e5);
+  color: white;
+  border: none;
+}
+
+.editButton:hover {
+  background-color: var(--primary-dark, #4338ca);
+}
+
+.logoutButton {
+  background-color: transparent;
+  color: var(--danger-color, #dc2626);
+  border: 1px solid var(--danger-color, #dc2626);
+}
+
+.logoutButton:hover {
+  background-color: var(--danger-hover, #fee2e2);
+}
+
+.error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-size: 18px;
+  color: var(--text-secondary, #666);
+}
+
+.memorySection {
+  margin-top: 30px;
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .profileInfo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .avatar {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .editButton, .logoutButton {
+    width: 100%;
+  }
+} 

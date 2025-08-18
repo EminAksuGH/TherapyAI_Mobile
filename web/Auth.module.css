@@ -1,0 +1,302 @@
+.authContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 70px);
+  padding: 20px;
+  animation: fadeIn 0.6s ease-out forwards;
+  overflow: hidden;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.authForm {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 35px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-height: calc(100vh - 110px);
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+}
+
+.authForm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.authForm h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--text-color);
+  font-weight: 600;
+  font-size: 1.75rem;
+}
+
+.formGroup {
+  margin-bottom: 18px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--button-bg);
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.formGroup input:focus {
+  border-color: var(--primary-link);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(188, 129, 196, 0.25);
+}
+
+.authButton {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--primary-link);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.authButton:hover {
+  background-color: var(--primary-link-hover);
+  transform: translateY(-1px);
+}
+
+.authButton:disabled {
+  background-color: var(--button-bg);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.verificationNotice {
+  background-color: rgba(255, 248, 225, 0.6);
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.verificationNotice p {
+  color: var(--text-color);
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.resendButton {
+  background-color: #fbc02d;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.resendButton:hover {
+  background-color: #f9a825;
+  transform: translateY(-1px);
+}
+
+.resendButton:disabled {
+  background-color: #eeeeee;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.loadingContainer p {
+  color: var(--text-color);
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-link);
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  background-color: var(--theme-error-bg, #fff3e0);
+  color: var(--theme-error-text, #333);
+  padding: 10px 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  border: 1px solid var(--theme-error-border, #ffe0b2);
+  animation: fadeInAlert 0.3s ease-out forwards;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.error::before {
+  content: "!";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  min-width: 20px;
+  height: 20px;
+  background-color: #f57c00;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.success {
+  display: flex;
+  align-items: center;
+  background-color: var(--theme-success-bg, #e8f5e9);
+  color: var(--theme-success-text, #333);
+  padding: 10px 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  border: 1px solid var(--theme-success-border, #c8e6c9);
+  animation: fadeInAlert 0.3s ease-out forwards;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.success::before {
+  content: "✓";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  min-width: 20px;
+  height: 20px;
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+@keyframes fadeInAlert {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.authLinks {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--text-color);
+}
+
+.authLinks a {
+  color: var(--primary-link);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.authLinks a:hover {
+  color: var(--primary-link-hover);
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .authContainer {
+    height: calc(100vh - 60px);
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+
+  .authForm {
+    padding: 25px 20px;
+    max-height: calc(100vh - 100px);
+  }
+  
+  .authForm h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .formGroup {
+    margin-bottom: 18px;
+  }
+}
+
+/* Desktop adjustments */
+@media (min-width: 768px) {
+  .authForm {
+    width: 400px;
+    padding: 35px;
+  }
+}
+
+/* Large desktop screens */
+@media (min-width: 1200px) {
+  .authForm {
+    width: 450px;
+  }
+} 
