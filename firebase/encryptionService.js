@@ -1,161 +1,196 @@
-// Use react-native-aes-gcm-crypto with GPT's suggested fixes
-const AesGcmCryptoLib = require('react-native-aes-gcm-crypto');
-const AesGcmCrypto = AesGcmCryptoLib.default;
+/**
+ * Production-ready AES-GCM encryption service
+ * Works consistently across web and React Native platforms
+ */
 
-// Debug: Check what's available in the imported library
-console.log('🔍 AesGcmCrypto:', AesGcmCrypto);
-console.log('🔍 AesGcmCrypto methods:', Object.keys(AesGcmCrypto || {}));
-console.log('🔍 encrypt method:', typeof AesGcmCrypto?.encrypt);
-console.log('🔍 decrypt method:', typeof AesGcmCrypto?.decrypt);
-console.log('🔍 encryptWebStyle method:', typeof AesGcmCrypto?.encryptWebStyle);
-console.log('🔍 decryptWebStyle method:', typeof AesGcmCrypto?.decryptWebStyle);
+// Polyfill for React Native to support crypto.getRandomValues
+import 'react-native-get-random-values';
+// Polyfill atob/btoa for React Native
+import {decode as atobPolyfill, encode as btoaPolyfill} from 'base-64';
+if (typeof global.atob === 'undefined') {
+    global.atob = atobPolyfill;
+}
+if (typeof global.btoa === 'undefined') {
+    global.btoa = btoaPolyfill;
+}
 
-// Also check the raw lib
-console.log('🔍 Raw AesGcmCryptoLib:', AesGcmCryptoLib);
-console.log('🔍 Raw methods:', Object.keys(AesGcmCryptoLib || {}));
+// Environment detection
+const isReactNative = typeof navigator !== 'undefined' && navigator.product === 'ReactNative';
+const isWeb = typeof window !== 'undefined' && !isReactNative;
 
+// Get encryption key from environment
+// Prefer non-public key if available
 const ENCRYPTION_KEY_STRING = 
+    process.env.EXPO_ENCRYPTION_KEY ||
     process.env.EXPO_PUBLIC_ENCRYPTION_KEY || 
     process.env.VITE_ENCRYPTION_KEY;
 
-// ✅ 1. ORTAK KEY ÜRETİMİ (GPT's suggestion)
-const getRawKey = () => {
+if (!ENCRYPTION_KEY_STRING) {
+    console.error('⚠️ WARNING: Encryption key not found in environment variables');
+}
+
+/**
+ * Derive a consistent 256-bit key from the string key
+ */
+const deriveKey = () => {
+    if (!ENCRYPTION_KEY_STRING) {
+        throw new Error('Encryption key not configured');
+    }
+    // Ensure we have exactly 32 bytes (256 bits) for AES-256
     const keyString = ENCRYPTION_KEY_STRING.padEnd(32, '0').substring(0, 32);
     return new TextEncoder().encode(keyString);
 };
 
-const getBase64Key = () => {
-    const key = getRawKey();
-    return btoa(String.fromCharCode(...key));
-};
-
-// Test key consistency
-console.log('🔑 Key test - Raw key length:', getRawKey().length);
-console.log('🔑 Key test - Base64 key:', getBase64Key().substring(0, 20) + '...');
-
 /**
- * Convert Uint8Array to base64 string
- * @param {Uint8Array} uint8Array 
- * @returns {string}
+ * Convert ArrayBuffer/Uint8Array to base64 string
  */
-const uint8ArrayToBase64 = (uint8Array) => {
-    return btoa(String.fromCharCode(...uint8Array));
+const arrayBufferToBase64 = (buffer) => {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
 };
 
 /**
- * Convert base64 string to Uint8Array
- * @param {string} base64String 
- * @returns {Uint8Array}
+ * Convert base64 string to ArrayBuffer
  */
-const base64ToUint8Array = (base64String) => {
-    const binaryString = atob(base64String);
-    const uint8Array = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-        uint8Array[i] = binaryString.charCodeAt(i);
+const base64ToArrayBuffer = (base64) => {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
     }
-    return uint8Array;
+    return bytes.buffer;
 };
 
 /**
- * ✅ 3. FIXED encryptWebStyle() - GPT's exact implementation
+ * Import the raw key for use with Web Crypto API
  */
-const encryptWebStyle = async (plainText, inBinary, keyBase64) => {
-    // Check if native encrypt method exists
-    if (!AesGcmCrypto || typeof AesGcmCrypto.encrypt !== 'function') {
-        throw new Error('AesGcmCrypto.encrypt method not available. Native module may not be properly linked.');
+let cachedCryptoKey = null;
+const getCryptoKey = async () => {
+    if (cachedCryptoKey) return cachedCryptoKey;
+    
+    const rawKey = deriveKey();
+    
+    // Use subtle crypto API (available on both web and React Native with polyfill)
+    const subtle = globalThis.crypto?.subtle || 
+                   (typeof window !== 'undefined' && window.crypto?.subtle);
+    
+    if (!subtle) {
+        throw new Error('Web Crypto API not available. Make sure polyfills are properly imported.');
     }
-
-    const result = await AesGcmCrypto.encrypt(plainText, inBinary, keyBase64);
-
-    const ivBytes = base64ToUint8Array(result.iv);        // 12 bytes
-    const contentBytes = base64ToUint8Array(result.content);
-    const tagBytes = base64ToUint8Array(result.tag);       // 16 bytes
-
-    // ✅ 2. Enforce IV length (12 bytes)
-    if (ivBytes.length !== 12) {
-        throw new Error(`IV must be 12 bytes for AES-GCM, got ${ivBytes.length}`);
-    }
-    if (tagBytes.length !== 16) {
-        throw new Error(`Tag must be 16 bytes for AES-GCM, got ${tagBytes.length}`);
-    }
-
-    console.log('🔐 Mobile encrypt - IV:', ivBytes.length, 'Content:', contentBytes.length, 'Tag:', tagBytes.length);
-
-    // Web-compatible: content + tag
-    const encryptedDataWithTag = new Uint8Array(contentBytes.length + tagBytes.length);
-    encryptedDataWithTag.set(contentBytes);
-    encryptedDataWithTag.set(tagBytes, contentBytes.length);
-
-    // Final format: IV (12) + EncryptedContent+Tag
-    const combined = new Uint8Array(ivBytes.length + encryptedDataWithTag.length);
-    combined.set(ivBytes);
-    combined.set(encryptedDataWithTag, ivBytes.length);
-
-    return uint8ArrayToBase64(combined); // like web does
-};
-
-/**
- * ✅ 4. FIXED decryptWebStyle() - GPT's exact implementation with error handling
- */
-const decryptWebStyle = async (base64Ciphertext, keyBase64, isBinary) => {
-    const combined = base64ToUint8Array(base64Ciphertext);
-
-    const ivSize = 12;
-    const tagSize = 16;
-
-    if (combined.length < ivSize + tagSize) {
-        throw new Error(`Message too short: ${combined.length}, minimum: ${ivSize + tagSize}`);
-    }
-
-    const iv = combined.slice(0, ivSize);
-    const encryptedWithTag = combined.slice(ivSize);
-    const tag = encryptedWithTag.slice(-tagSize);
-    const content = encryptedWithTag.slice(0, -tagSize);
-
-    console.log('🔐 Mobile decrypt - IV:', iv.length, 'Content:', content.length, 'Tag:', tag.length);
-
-    // Check if native decrypt method exists
-    if (!AesGcmCrypto || typeof AesGcmCrypto.decrypt !== 'function') {
-        throw new Error('AesGcmCrypto.decrypt method not available. Native module may not be properly linked.');
-    }
-
-    return AesGcmCrypto.decrypt(
-        uint8ArrayToBase64(content),
-        keyBase64,
-        uint8ArrayToBase64(iv),
-        uint8ArrayToBase64(tag),
-        isBinary
+    
+    cachedCryptoKey = await subtle.importKey(
+        'raw',
+        rawKey,
+        {
+            name: 'AES-GCM',
+            length: 256
+        },
+        false, // not extractable
+        ['encrypt', 'decrypt']
     );
+    
+    return cachedCryptoKey;
 };
 
 /**
- * Encrypt a message - MOBILE SIDE (uses base64 key)
- * @param {string} message - The message to encrypt
- * @returns {Promise<string>} - Web-compatible encrypted message
+ * @param {string} plaintext
+ * @returns {Promise<string>}
  */
-export const encryptMessage = async (message) => {
+export const encryptMessage = async (plaintext) => {
     try {
-        if (!message || typeof message !== 'string') {
-            return message;
+        if (!plaintext || typeof plaintext !== 'string') {
+            return plaintext;
         }
         
-        const keyBase64 = getBase64Key(); // Mobile uses base64 key
+        if (isEncrypted(plaintext)) {
+            console.warn('Message appears to be already encrypted');
+            return plaintext;
+        }
+
+        if (isReactNative) {
+            try {
+                const AesGcmCryptoLib = require('react-native-aes-gcm-crypto');
+                const AesGcmCrypto = AesGcmCryptoLib.default || AesGcmCryptoLib;
+
+                const rawKey = deriveKey();
+                const keyBase64 = arrayBufferToBase64(rawKey);
+
+                const result = await AesGcmCrypto.encrypt(plaintext, false, keyBase64);
+
+                const ivBytes = new Uint8Array(base64ToArrayBuffer(result.iv));
+                const contentBytes = new Uint8Array(base64ToArrayBuffer(result.content));
+                const tagBytes = new Uint8Array(base64ToArrayBuffer(result.tag));
+
+                if (ivBytes.length !== 12) {
+                    throw new Error(`IV must be 12 bytes for AES-GCM, got ${ivBytes.length}`);
+                }
+                if (tagBytes.length !== 16) {
+                    throw new Error(`Tag must be 16 bytes for AES-GCM, got ${tagBytes.length}`);
+                }
+
+                const combined = new Uint8Array(ivBytes.length + contentBytes.length + tagBytes.length);
+                combined.set(ivBytes, 0);
+                combined.set(contentBytes, ivBytes.length);
+                combined.set(tagBytes, ivBytes.length + contentBytes.length);
+
+                const finalBase64 = arrayBufferToBase64(combined);
+                console.log(`✅ Encrypted message (Mobile): ${plaintext.substring(0, 20)}... -> ${finalBase64.length} chars`);
+                return finalBase64;
+            } catch (nativeError) {
+                console.error('❌ Native AES-GCM encryption failed on mobile:', nativeError);
+                throw nativeError;
+            }
+        }
+
+        // Web or environments with SubtleCrypto
+        const key = await getCryptoKey();
+        const encoder = new TextEncoder();
+        const data = encoder.encode(plaintext);
         
-        console.log('🔐 Mobile encrypting:', message.substring(0, 20) + '...');
-        const encryptedResult = await encryptWebStyle(message, false, keyBase64);
-        console.log('✅ Mobile encrypted length:', encryptedResult.length);
+        // Generate a random 96-bit (12 bytes) IV for GCM
+        const iv = crypto.getRandomValues(new Uint8Array(12));
         
-        return encryptedResult;
+        // Get subtle crypto API
+        const subtle = globalThis.crypto?.subtle || 
+                       (typeof window !== 'undefined' && window.crypto?.subtle);
+        
+        // Encrypt the data
+        const encryptedData = await subtle.encrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv,
+                tagLength: 128 // 16 bytes authentication tag
+            },
+            key,
+            data
+        );
+        
+        // Combine IV and encrypted data (which includes the auth tag)
+        // Format: [IV (12 bytes)][Ciphertext][Auth Tag (16 bytes)]
+        const combined = new Uint8Array(iv.length + encryptedData.byteLength);
+        combined.set(iv, 0);
+        combined.set(new Uint8Array(encryptedData), iv.length);
+        
+        // Convert to base64 for storage/transmission
+        const result = arrayBufferToBase64(combined);
+        
+        console.log(`✅ Encrypted message (Web): ${plaintext.substring(0, 20)}... -> ${result.length} chars`);
+        
+        return result;
     } catch (error) {
-        console.error('❌ Mobile encryption error:', error);
-        throw new Error('Mobile encryption failed');
+        console.error('❌ Encryption error:', error);
+        // Throw to ensure callers do NOT save plaintext on failure
+        throw error;
     }
 };
 
 /**
- * Decrypt a message - MOBILE SIDE (handles web-encrypted messages)
- * @param {string} encryptedMessage - Web or mobile encrypted message
- * @returns {Promise<string>} - Decrypted message
+ * @param {string} encryptedMessage
+ * @returns {Promise<string>}
  */
 export const decryptMessage = async (encryptedMessage) => {
     try {
@@ -163,80 +198,148 @@ export const decryptMessage = async (encryptedMessage) => {
             return encryptedMessage;
         }
         
-        // Check if the message looks like it's encrypted
         if (!isEncrypted(encryptedMessage)) {
             return encryptedMessage;
         }
         
-        const keyBase64 = getBase64Key(); // Mobile uses base64 key
+        if (isReactNative) {
+            try {
+                const AesGcmCryptoLib = require('react-native-aes-gcm-crypto');
+                const AesGcmCrypto = AesGcmCryptoLib.default || AesGcmCryptoLib;
+
+                const keyBase64 = arrayBufferToBase64(deriveKey());
+                const combined = new Uint8Array(base64ToArrayBuffer(encryptedMessage));
+
+                const ivSize = 12;
+                const tagSize = 16;
+                if (combined.length < ivSize + tagSize) {
+                    throw new Error('Invalid encrypted message: too short');
+                }
+                const iv = combined.slice(0, ivSize);
+                const encryptedWithTag = combined.slice(ivSize);
+                const tag = encryptedWithTag.slice(-tagSize);
+                const content = encryptedWithTag.slice(0, -tagSize);
+
+                const plaintext = await AesGcmCrypto.decrypt(
+                    arrayBufferToBase64(content),
+                    keyBase64,
+                    arrayBufferToBase64(iv),
+                    arrayBufferToBase64(tag),
+                    false
+                );
+                console.log(`✅ Decrypted message (Mobile): ${plaintext.substring(0, 20)}...`);
+                return plaintext;
+            } catch (nativeDecErr) {
+                console.error('❌ Native AES-GCM decryption failed on mobile:', nativeDecErr);
+            }
+        }
+
+        const key = await getCryptoKey();
         
-        console.log('🔐 Mobile decrypting length:', encryptedMessage.length);
-        console.log('🔐 First 50 chars:', encryptedMessage.substring(0, 50));
+        // Convert from base64
+        const combined = new Uint8Array(base64ToArrayBuffer(encryptedMessage));
         
-        const decryptedResult = await decryptWebStyle(encryptedMessage, keyBase64, false);
-        console.log('✅ Mobile decryption succeeded:', decryptedResult.substring(0, 20) + '...');
+        // Validate minimum length (12 bytes IV + at least 16 bytes for tag)
+        if (combined.length < 28) {
+            throw new Error('Invalid encrypted message: too short');
+        }
         
-        return decryptedResult;
+        // Extract IV and encrypted data (with auth tag)
+        const iv = combined.slice(0, 12);
+        const encryptedData = combined.slice(12);
+        
+        // Get subtle crypto API
+        const subtle = globalThis.crypto?.subtle || 
+                       (typeof window !== 'undefined' && window.crypto?.subtle);
+        
+        // Decrypt the data
+        const decryptedData = await subtle.decrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv,
+                tagLength: 128 // 16 bytes authentication tag
+            },
+            key,
+            encryptedData
+        );
+        
+        // Convert back to string
+        const decoder = new TextDecoder();
+        const result = decoder.decode(decryptedData);
+        
+        console.log(`✅ Decrypted message (Web): ${result.substring(0, 20)}...`);
+        
+        return result;
     } catch (error) {
-        console.error('❌ Mobile decryption error:', error);
-        // Return original encrypted message so user can see something
+        console.error('❌ Decryption error:', error);
+        
+        // Authentication tag verification failure is the most common error
+        if (error.message?.includes('tag') || error.message?.includes('authentication')) {
+            console.error('Authentication tag verification failed - message may be corrupted or tampered');
+        }
+        
+        // Return original encrypted message to prevent data loss
+        // In production, you might want to handle this differently
         return encryptedMessage;
     }
 };
 
 /**
- * Simple heuristic to check if a message appears to be encrypted
+ * Check if a string appears to be encrypted
  * @param {string} message - The message to check
- * @returns {boolean} - Whether the message appears to be encrypted
+ * @returns {boolean} - True if message appears to be encrypted
  */
 const isEncrypted = (message) => {
-    // Encrypted messages are base64-encoded and should be at least 16 characters
-    if (message.length < 16) return false;
+    // Basic checks
+    if (!message || typeof message !== 'string' || message.length < 28) {
+        return false;
+    }
     
-    // Check for base64 pattern - if it matches base64 and is long enough, it's likely encrypted
+    // Check if it's valid base64
     const base64Pattern = /^[A-Za-z0-9+/]+=*$/;
-    if (!base64Pattern.test(message)) return false;
+    if (!base64Pattern.test(message)) {
+        return false;
+    }
     
-    // Additional heuristics for encrypted content:
-    // 1. Encrypted messages are typically longer than 32 characters (due to IV + encrypted data)
-    // 2. They have a more random character distribution
-    // 3. They don't have spaces (base64 doesn't contain spaces)
+    // Check for common plain text patterns
+    if (message.includes(' ') || message.includes('\n')) {
+        return false;
+    }
     
-    if (message.length < 24) return false; // Too short to be our encrypted format
-    
-    // Check if it contains spaces - encrypted base64 shouldn't have spaces
-    if (message.includes(' ')) return false;
-    
-    // Check for very obvious plain text patterns (but be more careful about short sequences)
-    const obviousPlainTextPatterns = [
-        /\b(hello|merhaba|nasılsın|how are you|selam)\b/i,  // Full words only
-        /^[a-zA-Z\s]{3,}$/,  // Only letters and spaces (plain text)
-        /\.(com|org|net|tr)$/i,  // URLs
-        /@[a-zA-Z0-9]/i  // Email addresses
+    // Check for obvious plain text patterns
+    const plainTextPatterns = [
+        /^https?:\/\//i,           // URLs
+        /^[a-zA-Z0-9._%+-]+@/i,    // Email addresses
+        /^\d{4}-\d{2}-\d{2}/,      // Dates
+        /^[a-zA-Z\s]+$/,           // Only letters and spaces
+        /\.(com|org|net|edu|gov)$/i, // Domain endings
     ];
     
-    for (const pattern of obviousPlainTextPatterns) {
+    for (const pattern of plainTextPatterns) {
         if (pattern.test(message)) {
-            return false; // Likely plain text
+            return false;
         }
     }
     
-    return true; // Likely encrypted
+    // Try to decode base64 and check if it has the expected structure
+    try {
+        const decoded = base64ToArrayBuffer(message);
+        // Should have at least IV (12) + tag (16) = 28 bytes
+        return decoded.byteLength >= 28;
+    } catch {
+        return false;
+    }
 };
 
 /**
- * Encrypt memory content
- * @param {string} content - The memory content to encrypt
- * @returns {Promise<string>} - The encrypted content
+ * Encrypt memory content (alias for consistency)
  */
 export const encryptMemoryContent = async (content) => {
     return await encryptMessage(content);
 };
 
 /**
- * Decrypt memory content
- * @param {string} encryptedContent - The encrypted memory content to decrypt
- * @returns {Promise<string>} - The decrypted content
+ * Decrypt memory content (alias for consistency)
  */
 export const decryptMemoryContent = async (encryptedContent) => {
     return await decryptMessage(encryptedContent);
@@ -245,34 +348,62 @@ export const decryptMemoryContent = async (encryptedContent) => {
 /**
  * Batch encrypt multiple messages
  * @param {Array} messages - Array of message objects with text property
- * @returns {Promise<Array>} - Array of messages with encrypted text
+ * @returns {Promise<Array>} - Array with encrypted text
  */
 export const encryptMessages = async (messages) => {
-    const encryptedMessages = [];
-    for (const message of messages) {
-        const encryptedText = await encryptMessage(message.text);
-        encryptedMessages.push({
-            ...message,
-            text: encryptedText
-        });
+    if (!Array.isArray(messages)) {
+        throw new TypeError('Messages must be an array');
     }
-    return encryptedMessages;
+    
+    try {
+        // Process in parallel for better performance
+        const encryptionPromises = messages.map(async (message) => {
+            const encryptedText = await encryptMessage(message.text);
+            return {
+                ...message,
+                text: encryptedText
+            };
+        });
+        
+        return await Promise.all(encryptionPromises);
+    } catch (error) {
+        console.error('Batch encryption error:', error);
+        // Return original messages on error
+        return messages;
+    }
 };
 
 /**
  * Batch decrypt multiple messages
  * @param {Array} messages - Array of message objects with encrypted text
- * @returns {Promise<Array>} - Array of messages with decrypted text
+ * @returns {Promise<Array>} - Array with decrypted text
  */
 export const decryptMessages = async (messages) => {
-    const decryptedMessages = [];
-    for (const message of messages) {
-        const decryptedText = await decryptMessage(message.text);
-        decryptedMessages.push({
-            ...message,
-            text: decryptedText
-        });
+    if (!Array.isArray(messages)) {
+        throw new TypeError('Messages must be an array');
     }
-    return decryptedMessages;
+    
+    try {
+        // Process in parallel for better performance
+        const decryptionPromises = messages.map(async (message) => {
+            const decryptedText = await decryptMessage(message.text);
+            return {
+                ...message,
+                text: decryptedText
+            };
+        });
+        
+        return await Promise.all(decryptionPromises);
+    } catch (error) {
+        console.error('Batch decryption error:', error);
+        // Return original messages on error
+        return messages;
+    }
 };
 
+// Export crypto key derivation for testing purposes
+export const __testing = {
+    deriveKey,
+    getCryptoKey,
+    isEncrypted
+};

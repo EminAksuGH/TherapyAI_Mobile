@@ -1,0 +1,7 @@
+android/
+ios/
+
+# common large outputs not needed on builder
+web-build/
+dist/
+.expo/
